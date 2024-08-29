@@ -1,0 +1,189 @@
+# # # # ==============================================================================================================
+# import pyowm
+# from pyowm.utils.config import get_default_config
+# import pyttsx3
+# import speech_recognition as sr
+
+# # Define the AI class
+# class AI:
+#     def __init__(self, api_key):
+#         # Initialize the OpenWeatherMap API key and configuration
+#         self.api_key = api_key
+#         self.config_dict = get_default_config()
+#         self.config_dict['language'] = 'en'
+
+#         # Create an OWM (OpenWeatherMap) object with the API key and configuration
+#         self.owm = pyowm.OWM(self.api_key, self.config_dict)
+#         self.mgr = self.owm.weather_manager()
+
+#         # Initialize text-to-speech engine
+#         self.speaker = pyttsx3.init()
+
+#         # Initialize speech recognition
+#         self.recognizer = sr.Recognizer()
+#         self.microphone = sr.Microphone()
+
+#         # Define alarm conditions
+#         self.to_low = 25  # Celsius
+#         self.to_high = 45  # Celsius
+#         self.rain_alarm = True  # Alarm should trigger if it rains
+
+#     def speak(self, text):
+#         # Convert text to speech
+#         self.speaker.say(text)
+#         self.speaker.runAndWait()
+
+#     def listen(self):
+#         with self.microphone as source:
+#             print("Listening...")
+#             self.speak("I am listening. Please speak now.")
+#             audio = self.recognizer.listen(source)
+
+#         try:
+#             # Recognize speech using Google Web Speech API
+#             text = self.recognizer.recognize_google(audio)
+#             print(f"You said: {text}")
+#             return text
+#         except sr.UnknownValueError:
+#             self.speak("Sorry, I did not understand what you said.")
+#             print("Sorry, I did not understand what you said.")
+#             return None
+#         except sr.RequestError:
+#             self.speak("Sorry, there was an error with the speech recognition service.")
+#             print("Sorry, there was an error with the speech recognition service.")
+#             return None
+
+#     def check_alarm(self, weather, t):
+#         temp_c = weather.temperature('celsius')['temp']
+#         temp_f = weather.temperature('fahrenheit')['temp']
+
+#         if t == 1:
+#             self.speak("Temperature in Celsius.")
+#             # Check temperature against alarm thresholds
+#             if( temp_c < self.to_low):
+#                 self.speak(f"Alarm! Temperature is too low: {temp_c}°C")
+#             if (temp_c > self.to_high):
+#                 self.speak(f"Alarm! Temperature is too high: {temp_c}°C")
+
+#         elif t == 2:
+#             self.speak("Temperature in Fahrenheit.")
+#             # Convert thresholds to Fahrenheit for comparison
+#             to_low_f = (self.to_low * 9/5) + 32
+#             to_high_f = (self.to_high * 9/5) + 32
+
+#             if (temp_f < to_low_f):
+#                 self.speak(f"Alarm! Temperature is too low: {temp_f}°F")
+#             if (temp_f > to_high_f):
+#                 self.speak(f"Alarm! Temperature is too high: {temp_f}°F")
+
+#         if (self.rain_alarm and weather.rain):
+#             self.speak("Alarm! It's raining.")
+
+#     def get_weather(self, city, t, future=False):
+#         try:
+#             # Check if future weather forecast is requested
+#             if (future):
+#                 forecast = self.mgr.forecast_at_place(city, '3h').forecast
+#                 weather = forecast.weathers[0]
+#                 self.speak("Here is the 3-hour weather forecast.")
+#             else:
+#                 # Get current weather
+#                 observation = self.mgr.weather_at_place(city)
+#                 weather = observation.weather
+
+#             # Check for alarm conditions
+#             self.check_alarm(weather, t)
+
+#             # Extract and display weather details
+#             temperature_c = weather.temperature('celsius')['temp']
+#             temperature_f = weather.temperature('fahrenheit')['temp']
+#             pressure = weather.pressure['press']
+#             humidity = weather.humidity
+#             weather_description = weather.detailed_status
+#             wind_speed = weather.wind()['speed']
+
+#             weather_info = f"Weather of {city}:"
+#             self.speak(weather_info)
+#             print(weather_info)
+
+#             if (t == 1):
+#                 temp_info = f"Temperature in Celsius: {temperature_c} °C"
+#             elif (t == 2):
+#                 temp_info = f"Temperature in Fahrenheit: {temperature_f} °F"
+#             else:
+#                 error_msg = f"{t} is an Invalid Input"
+#                 self.speak(error_msg)
+#                 print(error_msg)
+#                 return
+
+#             self.speak(temp_info)
+#             print(temp_info)
+
+#             pressure_info = f"Pressure is {pressure} hPa"
+#             humidity_info = f"Humidity is {humidity}%"
+#             weather_desc_info = f"Weather Description: {weather_description}"
+#             wind_speed_info = f"Wind Speed is {wind_speed} m/s"
+
+#             self.speak(pressure_info)
+#             self.speak(humidity_info)
+#             self.speak(weather_desc_info)
+#             self.speak(wind_speed_info)
+
+#             print(pressure_info)
+#             print(humidity_info)
+#             print(weather_desc_info)
+#             print(wind_speed_info)
+
+#         except Exception as e:
+#             # Handle and report any errors
+#             error_msg = f"An error occurred: {e}"
+#             self.speak(error_msg)
+#             print(error_msg)
+
+# # Main program running
+# if __name__ == "__main__":
+#     # API key for OpenWeather API
+#     api_key = "7271cae763955ac86c0b3dbdcd7f7f55"
+
+#     # Build up an AI object instance
+#     weather_ai = AI(api_key)
+
+# #     #Ask if the user wants to input the city manually
+#     weather_ai.speak("Would you like to input the city name manually? Please say 'yes' or 'no' .")
+#     # manual_response = tony_ai.listen()
+#     # # Default Values of Manual Respose
+#     manual_response = 'yes'  
+
+#     if (manual_response and manual_response.lower() == 'yes'):
+#         weather_ai.speak("Please type the city name.")
+#         city = input("Please type the city name: ")
+#     else:
+#         # Get the city name through a voice command
+#         weather_ai.speak("Please say the city name.")
+#         city = weather_ai.listen()
+
+#     if not city:
+#         exit()
+
+#     # Temperature choice
+#     weather_ai.speak("Temperature in Celsius or Fahrenheit? Say '1' for Celsius and '2' for Fahrenheit.")
+#     t = int(input("Enter Your Choice 1 or 2: "))
+
+#     if t == 1:
+#         weather_ai.speak("Temperature in Celsius.")
+#     elif t == 2:
+#         weather_ai.speak("Temperature in Fahrenheit.")
+#     else:
+#         weather_ai.speak("Invalid Input.")
+#         exit()
+
+#     # Get future forecast by voice
+#     weather_ai.speak("Would you like the future weather report?")
+#     # # Speak Yes for Future forecast
+#     # future_response = weather_ai.listen().lower()
+#     # future = 'yes' in future_response
+#     # # # Default Value
+#     future=True
+
+#     # Fetch and show the weather data
+#     weather_ai.get_weather(city, t, future)
